@@ -85,6 +85,11 @@ services:
       - JACKETT_URL=http://jackett:9117
       - JACKETT_API=${JACKETT_API}
       
+      # Переменные для qBittorrent API (мониторинг закачек)
+      - QBITTORRENT_URL=http://qbittorrent:8083
+      - QBITTORRENT_USER=${QBITTORRENT_USER:-admin}
+      - QBITTORRENT_PASS=${QBITTORRENT_PASS:-adminadmin}
+      
       # Заворачиваем трафик бота в VLESS прокси (если требуется)
       - HTTP_PROXY=http://xray:10809
       - HTTPS_PROXY=http://xray:10809
