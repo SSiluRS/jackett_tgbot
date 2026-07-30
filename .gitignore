@@ -1,0 +1,14 @@
+.git
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv/
+env/
+venv/
+torrent-watch/
+jackett-config/
+qbittorrent-config/
+xray-config/
+flaresolver/
