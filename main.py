@@ -34,10 +34,14 @@ QBITTORRENT_URL = os.getenv("QBITTORRENT_URL", "http://qbittorrent:8083").rstrip
 QBITTORRENT_USER = os.getenv("QBITTORRENT_USER", "admin")
 QBITTORRENT_PASS = os.getenv("QBITTORRENT_PASS", "adminadmin")
 
+from aiogram.client.session.aiohttp import AiohttpSession
+
 if not TOKEN:
     logging.warning("Внимание: TG_TOKEN не установлен в переменных окружения!")
 
-bot = Bot(token=TOKEN) if TOKEN else None
+# Сессия Telegram идет напрямую, игнорируя системные HTTP_PROXY / HTTPS_PROXY
+bot_session = AiohttpSession(proxy=None) if TOKEN else None
+bot = Bot(token=TOKEN, session=bot_session) if TOKEN else None
 dp = Dispatcher()
 
 class LRUDict(OrderedDict):
@@ -56,8 +60,12 @@ links_db = LRUDict(maxsize=500)
 
 def is_allowed(user_id: int) -> bool:
     if not ALLOWED_IDS:
+        logging.info(f"ALLOWED_IDS is empty -> access GRANTED for user {user_id}")
         return True
-    return user_id in ALLOWED_IDS
+    allowed = user_id in ALLOWED_IDS
+    if not allowed:
+        logging.warning(f"Access DENIED for user {user_id}. Allowed IDs: {ALLOWED_IDS}")
+    return allowed
 
 def format_size(size_bytes: float) -> str:
     if size_bytes <= 0:
@@ -119,6 +127,7 @@ async def get_qbittorrent_torrents():
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
+    logging.info(f"Received /start from user_id={message.from_user.id}")
     if not is_allowed(message.from_user.id):
         return
     text = (
@@ -216,6 +225,7 @@ async def generate_downloads_status():
 
 @dp.message(F.text)
 async def search(message: types.Message):
+    logging.info(f"Received text '{message.text}' from user_id={message.from_user.id}")
     if not is_allowed(message.from_user.id):
         return
 
