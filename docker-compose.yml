@@ -70,11 +70,11 @@ services:
       - vpn_net
 
   jackett_tgbot:
-    # Локальная сборка или Docker Hub / GHCR образ
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: jackett_tgbot:latest
+    image: ghcr.io/ssilurs/jackett_tgbot:latest
+    # Раскомментируйте build, если собираете образ локально, а не качаете с GHCR:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     container_name: jackett_tgbot
     restart: always
     environment:
