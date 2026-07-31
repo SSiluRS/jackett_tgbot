@@ -90,9 +90,9 @@ services:
       - QBITTORRENT_USER=${QBITTORRENT_USER:-admin}
       - QBITTORRENT_PASS=${QBITTORRENT_PASS:-adminadmin}
       
-      # Прокси для Telegram бота отключен, так как api.telegram.org доступен напрямую
-      # - HTTP_PROXY=http://xray:10809
-      # - HTTPS_PROXY=http://xray:10809
+      # Заворачиваем весь трафик бота в VLESS прокси (для обхода блокировок Telegram)
+      - HTTP_PROXY=http://xray:10809
+      - HTTPS_PROXY=http://xray:10809
     volumes:
       # Папка автозагрузки, которую слушает qBittorrent
       - ./torrent-watch:/watch

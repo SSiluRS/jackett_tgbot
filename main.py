@@ -39,9 +39,8 @@ from aiogram.client.session.aiohttp import AiohttpSession
 if not TOKEN:
     logging.warning("Внимание: TG_TOKEN не установлен в переменных окружения!")
 
-# Принудительно отключаем прокси для взаимодействия с api.telegram.org
-bot_session = AiohttpSession()
-bot_session._trust_env = False  # Игнорировать переменные HTTP_PROXY / HTTPS_PROXY окружения
+# Использование Xray VLESS прокси для работы с Telegram API (api.telegram.org)
+bot_session = AiohttpSession(proxy=PROXY) if (TOKEN and PROXY) else (AiohttpSession() if TOKEN else None)
 bot = Bot(token=TOKEN, session=bot_session) if TOKEN else None
 dp = Dispatcher()
 
