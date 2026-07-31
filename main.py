@@ -297,48 +297,14 @@ async def download_torrent(call: types.CallbackQuery):
         await call.answer("Ссылка устарела или не найдена. Повторите поиск.", show_alert=True)
         return
 
-    await call.answer("Скачиваю торрент...")
+    await call.answer("Отправляю в Jackett...")
 
-    if download_link.startswith("magnet:"):
+    # Вызываем скачивание через Jackett (Jackett сам поместит файл в watch/qBittorrent)
+    timeout = aiohttp.ClientTimeout(total=30)
+    async with aiohttp.ClientSession(timeout=timeout, trust_env=False) as session:
         try:
-            os.makedirs(WATCH_DIR, exist_ok=True)
-            fname = f"torrent_{link_id}.magnet"
-            filepath = os.path.join(WATCH_DIR, fname)
-            async with aiofiles.open(filepath, 'w', encoding='utf-8') as f:
-                await f.write(download_link)
-
-            kb = InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(text="📊 Прогресс закачек", callback_data="refresh_downloads")
-            ]])
-            await call.message.edit_text(
-                f"{call.message.html_text}\n\n✅ <b>Magnet-ссылка отправлена в загрузки!</b>",
-                reply_markup=kb,
-                parse_mode="HTML"
-            )
-        except Exception as e:
-            logging.error(f"Error writing magnet file: {e}")
-            await call.message.edit_text("❌ Ошибка при сохранении magnet-файла.")
-        return
-
-    timeout = aiohttp.ClientTimeout(total=60)
-    async with aiohttp.ClientSession(timeout=timeout) as session:
-        try:
-            async with session.get(download_link, proxy=PROXY, allow_redirects=True) as resp:
-                if resp.status == 200:
-                    content = await resp.read()
-
-                    cd = resp.headers.get("Content-Disposition", "")
-                    fname = f"torrent_{link_id}.torrent"
-                    if "filename=" in cd:
-                        extracted = cd.split("filename=")[-1].strip('"').strip("'")
-                        if extracted:
-                            fname = extracted
-
-                    os.makedirs(WATCH_DIR, exist_ok=True)
-                    filepath = os.path.join(WATCH_DIR, fname)
-                    async with aiofiles.open(filepath, 'wb') as f:
-                        await f.write(content)
-
+            async with session.get(download_link, allow_redirects=True) as resp:
+                if resp.status in (200, 204, 302):
                     kb = InlineKeyboardMarkup(inline_keyboard=[[
                         InlineKeyboardButton(text="📊 Прогресс закачек", callback_data="refresh_downloads")
                     ]])
@@ -348,11 +314,11 @@ async def download_torrent(call: types.CallbackQuery):
                         parse_mode="HTML"
                     )
                 else:
-                    logging.error(f"Download status {resp.status} for link {download_link}")
-                    await call.message.edit_text("❌ Ошибка при скачивании файла с трекера.")
+                    logging.error(f"Jackett trigger status {resp.status} for link {download_link}")
+                    await call.message.edit_text(f"❌ Jackett вернул статус {resp.status}.")
         except Exception as e:
-            logging.error(f"Download error: {e}")
-            await call.message.edit_text("❌ Ошибка соединения при скачивании.")
+            logging.error(f"Download trigger error: {e}")
+            await call.message.edit_text("❌ Ошибка соединения с Jackett.")
 
 async def main():
     if not bot:
