@@ -238,7 +238,7 @@ async def search(message: types.Message):
 
     msg = await message.answer(f"🔍 Ищу «<b>{html.escape(query)}</b>»...", parse_mode="HTML")
 
-    timeout = aiohttp.ClientTimeout(total=30)
+    timeout = aiohttp.ClientTimeout(total=90)
     async with aiohttp.ClientSession(timeout=timeout, trust_env=False) as session:
         try:
             # trust_env=False гарантирует прямой запрос к локальному Jackett в сети Docker без Xray прокси
