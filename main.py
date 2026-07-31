@@ -250,7 +250,7 @@ async def search(message: types.Message):
                     return
                 data = await resp.json()
         except Exception as e:
-            logging.error(f"Error querying Jackett API: {e}")
+            logging.error(f"Error querying Jackett API: {e}", exc_info=True)
             await msg.edit_text(f"❌ Ошибка соединения: {html.escape(str(e))}", parse_mode="HTML")
             return
 
