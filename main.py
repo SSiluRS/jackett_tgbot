@@ -241,7 +241,8 @@ async def search(message: types.Message):
     timeout = aiohttp.ClientTimeout(total=30)
     async with aiohttp.ClientSession(timeout=timeout) as session:
         try:
-            async with session.get(api_url, params=params, proxy=PROXY) as resp:
+            # Запрос к локальному Jackett в Docker сети идет без внешнего прокси
+            async with session.get(api_url, params=params) as resp:
                 if resp.status != 200:
                     text_err = await resp.text()
                     logging.error(f"Jackett API status {resp.status}: {text_err[:200]}")
