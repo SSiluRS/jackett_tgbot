@@ -105,9 +105,9 @@ async def get_qbittorrent_torrents():
     timeout = aiohttp.ClientTimeout(total=10)
     async with aiohttp.ClientSession(timeout=timeout) as session:
         try:
-            # 1. Авторизация
+            # 1. Авторизация (qBittorrent возвращает 200 или 204 "No Content" при успешном входе)
             async with session.post(login_url, data={"username": QBITTORRENT_USER, "password": QBITTORRENT_PASS}) as resp:
-                if resp.status != 200:
+                if resp.status not in (200, 204):
                     logging.error(f"qBittorrent auth failed: {resp.status}")
                     return None, "❌ Ошибка авторизации в qBittorrent."
                 cookie = resp.cookies.get("SID")

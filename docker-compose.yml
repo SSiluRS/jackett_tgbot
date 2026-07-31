@@ -71,12 +71,10 @@ services:
 
   jackett_tgbot:
     image: ghcr.io/ssilurs/jackett_tgbot:latest
-    # Раскомментируйте build, если собираете образ локально, а не качаете с GHCR:
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
     container_name: jackett_tgbot
     restart: always
+    env_file:
+      - .env
     environment:
       - TG_TOKEN=${TG_TOKEN}
       - USERS=${USERS} # Telegram ID пользователей через запятую
