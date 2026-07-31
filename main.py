@@ -239,9 +239,9 @@ async def search(message: types.Message):
     msg = await message.answer(f"🔍 Ищу «<b>{html.escape(query)}</b>»...", parse_mode="HTML")
 
     timeout = aiohttp.ClientTimeout(total=30)
-    async with aiohttp.ClientSession(timeout=timeout) as session:
+    async with aiohttp.ClientSession(timeout=timeout, trust_env=False) as session:
         try:
-            # Запрос к локальному Jackett в Docker сети идет без внешнего прокси
+            # trust_env=False гарантирует прямой запрос к локальному Jackett в сети Docker без Xray прокси
             async with session.get(api_url, params=params) as resp:
                 if resp.status != 200:
                     text_err = await resp.text()
